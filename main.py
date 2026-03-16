@@ -1,0 +1,31 @@
+from flask import Flask, render_template, request
+from scraper import scrape_seo_data
+from ai_engine import generate_seo_report
+import markdown
+
+
+app = Flask(__name__)
+
+
+@app.route('/', methods=["GET"])
+def home():
+    return render_template("index.html")
+
+
+
+@app.route('/analyze', methods=["POST"])
+def analyze():
+    website = request.form.get("website")
+    seo_data = scrape_seo_data(website)
+    ai_response = generate_seo_report(seo_data)
+    html_report = markdown.markdown(ai_response)
+    print(website)
+    return render_template("report.html", report=html_report)
+
+#  As an Expert SEO Consultant, I've reviewed the provided Title, Meta Description, and H1 tags for your website. Here's my assessment: --- ### **SEO Grade: 45/100** This grade reflects significant missed opportunities in branding, keyword optimization, and clarity, particularly in the Title and H1. While the Meta Description includes good keywords, its excessive length and lack of a strong call to action detract from its effectiveness. --- ### **What is Wrong:** **1. Title: `Apple`** * **Ambiguity and Lack of Keywords:** "Apple" is incredibly broad. While it's the brand name, it fails to tell search engines or users *what kind* of Apple site this is (tech company, fruit store, record label?). This severely limits its ability to rank for relevant, specific queries beyond just the brand name. * **Too Short:** At just 5 characters, it wastes valuable character space (up to 60 characters are typically displayed in search results) that could be used for primary keywords, a value proposition, or stronger branding like "Official Site." * **Poor Click-Through Rate (CTR):** A generic title like this offers no compelling reason for a user to click, even if they recognize the brand, compared to a title that clearly states the site's purpose or offerings. **2. Meta Description: `Discover the innovative world of Apple and shop everything iPhone, iPad, Apple Watch, Mac, and Apple TV, plus explore accessories, entertainment, and expert device support.`** * **Excessive Length:** The current description is 187 characters long. Google typically truncates descriptions around 150-160 characters on desktop (and even less on mobile). This means valuable information like "expert device support" or the full list of products might be cut off, reducing its impact. * **Weak Call to Action (CTA):** While "shop everything" is a soft CTA, it could be more compelling and explicit, encouraging immediate action. * **Missed Opportunity for Unique Selling Proposition (USP):** While it mentions "innovative world" and "expert device support," these could be integrated more powerfully within a concise, action-oriented message. * **Repetitive Phrase:** While including "Apple" is fine, the description could be more dynamic if the brand name isn't at the very beginning, given the title will likely display "Apple" prominently. **3. H1: `['Apple']`** * **Generic and Undescriptive:** Similar to the title, an H1 of just "Apple" is far too generic. The H1 tag should be the main heading for the page, clearly summarizing its content for both users and search engines. If this is the homepage, it should reflect the breadth of Apple's offerings. * **Missed Keyword Opportunity:** The H1 is a prime location for the page's main target keywords. A generic H1 signals less relevance to search engines for specific product or service queries. * **Lack of Context:** It doesn't provide immediate context about what the user will find on this particular page. --- ### **Optimized Alternatives:** Here are three optimized alternatives for your Title and Meta Description, assuming this is the main Apple homepage: #### **Optimized Title Alternatives (Aiming for ~50-60 characters):** 1. **Apple Official Site | iPhone, iPad, Mac, Watch & TV - Shop Now** * *(Character Count: 60)* * **Why it's better:** Clearly states "Official Site" for trust, lists core popular products as keywords, and includes a strong call to action ("Shop Now"). 2. **Apple: Innovation, Technology & Official Store | iPhone, Mac & More** * *(Character Count: 60)* * **Why it's better:** Emphasizes "Innovation" and "Technology" from the original description, reinforces "Official Store," and highlights key products concisely. 3. **Apple - Discover iPhone, iPad, Mac & Expert Support | Official Site** * *(Character Count: 60)* * **Why it's better:** Uses action verbs "Discover," lists key products, includes "Expert Support" (a value add), and ends with "Official Site" for authority. #### **Optimized Meta Description Alternatives (Aiming for ~150-160 characters):** 1. **Explore the innovative world of Apple. Shop the latest iPhone, iPad, Mac, Apple Watch & Apple TV. Get expert support, accessories & entertainment. Your official destination.** * *(Character Count: 160)* * **Why it's better:** Concise, includes all major products and benefits, strong keywords, and a clear "official destination" value proposition, all within optimal length. 2. **Experience cutting-edge Apple technology. Shop the newest iPhone, iPad, Mac, Watch & accessories. Find entertainment, services & dedicated device support. Visit today!** * *(Character Count: 160)* * **Why it's better:** Focuses on the "experience" of Apple tech, lists products, includes services and support, and ends with a strong, active CTA ("Visit today!"). 3. **Unleash your potential with Apple devices. Discover & shop iPhone, iPad, Mac, Apple Watch & TV, plus accessories. Access exclusive entertainment & expert support here.** * *(Character Count: 160)* * **Why it's better:** Benefit-oriented opening ("Unleash your potential"), comprehensive list of offerings, and highlights "exclusive entertainment" and "expert support" with a clear locator ("here"). --- **Regarding the H1:** For optimal SEO and user experience, your H1 should be more descriptive, perhaps something like: * **`Welcome to Apple: Innovation, Products & Support`** (for the homepage) * **`Apple: Explore iPhone, iPad, Mac, Watch & More`** (for a product overview page) By implementing these changes, your website will provide clearer signals to search engines about its content and offer a more compelling reason for users to click through from search results.
+
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5001)
