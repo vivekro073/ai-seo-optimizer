@@ -9,13 +9,83 @@
 <body class="bg-gray-50 p-8">
     <div class="max-w-4xl mx-auto bg-white p-10 rounded-xl shadow-lg mt-10">
     <div class="prose prose-blue max-w-none text-gray-800">
-    {{ report | safe }}
-        </div>
-            <a href="/"
-                class="block text-center w-full bg-blue-600 text-white font-bold py-3 px-4 mt-8 rounded-md hover:bg-blue-700 transition duration-300">
-                Generate Another Audit
-            </a>
-        </div>
+    <h1>SEO Score: {{ report.seo_score }} / 100</h1>
+        <p>{{ report.executive_summary }}</p>
+
+        <h2 class="text-2xl font-bold mt-8 mb-4 text-gray-900">What's Wrong:</h2>
+            <ul class="list-disc pl-6 space-y-4 text-gray-700">
+                <li>
+                    <strong>Title Issues:</strong> {{ report.meta_optimizations.title_issues }}
+                </li>
+                <li>
+                    <strong>Meta Description Issues:</strong> {{ report.meta_optimizations.description_issues }}
+                </li>
+                {% for error in report.header_audit.hierarchy_errors %}
+                <li>
+                    <strong>Header Consistency:</strong> {{ error }}
+                </li>
+                {% endfor %}
+            </ul>
+
+            <h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900">Optimized Alternatives:</h2>
+            <p class="mb-4 text-gray-700">Here are three optimized alternatives for each tag:</p>
+
+            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-800">Optimized Title Alternatives:</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-700">
+                {% for alt in report.meta_optimizations.title_alternatives %}
+                    <li>{{ alt }}</li>
+                {% endfor %}
+            </ul>
+
+            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-800">Optimized Meta Description Alternatives:</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-700">
+                {% for alt in report.meta_optimizations.description_alternatives %}
+                    <li>{{ alt }}</li>
+                {% endfor %}
+            </ul>
+
+            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-800">Optimized H1 Alternatives:</h3>
+            <ul class="list-disc pl-6 space-y-2 text-gray-700">
+                {% for alt in report.header_audit.h1_alternatives %}
+                    <li>{{ alt }}</li>
+                {% endfor %}
+            </ul>
+
+            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-800">Subheading (H2-H6) Improvements:</h3>
+            {% if report.header_audit.subheading_improvements %}
+                <ul class="list-disc pl-6 space-y-3 text-gray-700">
+                    {% for sub in report.header_audit.subheading_improvements %}
+                        <li>
+                            <strong>Original:</strong> "{{ sub.original }}" <br>
+                            <strong>Optimized:</strong> <span class="text-green-700 font-semibold">{{ sub.suggested }}</span> <br>
+                            <span class="text-sm text-gray-500 italic">Reason: {{ sub.reason }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-700 italic">Subheadings appear to be well-optimized.</p>
+            {% endif %}
+
+            <h3 class="text-lg font-bold mt-8 mb-2 text-gray-800">Image Accessibility (Missing Alt Tags):</h3>
+                {% if report.image_audit and report.image_audit.fix_recommendations %}
+                    <p class="mb-4 text-gray-700">Found {{ report.image_audit.missing_alt_count }} images missing descriptive text. Here are AI-generated suggestions based on the filenames:</p>
+                    <ul class="list-disc pl-6 space-y-3 text-gray-700">
+                        {% for image in report.image_audit.fix_recommendations %}
+                            <li>
+                                <strong>Image URL:</strong> <a href="{{ image.src }}" class="text-blue-600 underline text-sm break-all" target="_blank">{{ image.src }}</a><br>
+                                <strong>Suggested Alt Text:</strong> <span class="text-green-700 font-semibold">{{ image.suggested_alt }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-gray-700 italic">No image accessibility issues found. Great job!</p>
+                {% endif %}
+            </div>
+                <a href="/"
+                    class="block text-center w-full bg-blue-600 text-white font-bold py-3 px-4 mt-8 rounded-md hover:bg-blue-700 transition duration-300">
+                    Generate Another Audit
+                </a>
+            </div>
 
 </body>
 </html>

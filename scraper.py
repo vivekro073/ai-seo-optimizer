@@ -1,23 +1,3 @@
-# 1. The Imports: Import the requests library, and import BeautifulSoup from bs4.
-#
-# 2. The Function Definition: Define a function called scrape_seo_data(url) that takes a single target URL as its parameter.
-#
-# 3. The Network Request: Inside the function, use requests.get() to fetch the webpage.
-# (Pro-tip: Websites routinely block automated scripts. Create a dictionary with a standard User-Agent header and pass it into your request so the target server thinks you are a normal Chrome browser).
-#
-# 4. The Parser: Pass the text of the webpage response into BeautifulSoup using the "html.parser".
-#
-# 5. The Extraction: Use BeautifulSoup to extract three specific pieces of data:
-#
-# The text of the <title> tag.
-#
-# The content attribute of the <meta name="description"> tag.
-#
-# A list of all <h1> tags on the page (extract just the text from them).
-#
-# 6. The Payload: Package everything into a clean Python dictionary and return it. It should look something like this structurally: {"title": ..., "description": ..., "h1_tags": [...]}
-
-
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -25,20 +5,43 @@ import re
 
 def scrape_seo_data(url):
     headers = {"User-Agent": "Mozilla/5.0"}
-    page =  requests.get(url, headers=headers)
+    try:
+        page = requests.get(url, headers=headers, timeout=10)
+        page.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Failed to fetch URL: {str(e)}"}
     data = page.text
 
     soup = BeautifulSoup(data, 'html.parser')
 
     title = soup.find("title")
     description = soup.find('meta', attrs={'name': re.compile("description", re.IGNORECASE)})
+
     h1 = soup.find_all("h1")
-    h1_text = [heading.text for heading in h1]
+    h1_text = [h1_heading.text for h1_heading in h1]
+    h2 = soup.find_all("h2")
+    h2_text = [h2_heading.text for h2_heading in h2]
+    h3 = soup.find_all("h3")
+    h3_text = [h3_heading.text for h3_heading in h3]
+    h4 = soup.find_all("h4")
+    h4_text = [h4_heading.text for h4_heading in h4]
+    h5 = soup.find_all("h5")
+    h5_text = [h5_heading.text for h5_heading in h5]
+    h6 = soup.find_all("h6")
+    h6_text = [h6_heading.text for h6_heading in h6]
+
+    images = soup.find_all("img")
+    image_tags = [{'src': img.get("src"), 'alt': img.get("alt")} for img in images]
 
     website_data = {"title": title.text if title else "No Title",
                     "description": description["content"] if description else "No description found",
-                    "h1": h1_text if h1_text else "No h1"}
+                    "h1": h1_text if h1_text else "No h1",
+                    "h2": h2_text if h2_text else "No h2",
+                    "h3": h3_text if h3_text else "No h3",
+                    "h4": h4_text if h4_text else "No h4",
+                    "h5": h5_text if h5_text else "No h5",
+                    "h6": h6_text if h6_text else "No h6",
+                    "alt_tag": image_tags,
+                    }
 
     return website_data
-
-#print(scrape_seo_data("https://www.apple.com"))
