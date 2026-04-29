@@ -24,17 +24,10 @@ def analyze():
         return render_template("report.html", report=ai_response)
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"API Error: {e}")
 
-        fallback_report = {
-            "seo_score": 0,
-            "executive_summary": "The AI analysis server is currently overloaded. Please try running the audit again in a few minutes.",
-            "meta_optimizations": {},
-            "header_audit": {},
-            "image_audit": {}
-        }
-
-        return render_template("report.html", report=fallback_report, broken_links=[])
+        error_msg = "The AI server is experiencing heavy traffic right now. Please wait a moment and try again."
+        return render_template("index.html", error=error_msg)
 
 
 if __name__ == "__main__":
