@@ -1,12 +1,11 @@
-from google import genai
+from groq import Groq
 from dotenv import load_dotenv
 import os
 import json
 import time
 
 load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def generate_seo_report(website_data):
     prompt = f"""
@@ -49,20 +48,36 @@ def generate_seo_report(website_data):
     {website_data}
     """
 
-    max_retries = 5
+    max_retries = 3
     for attempt in range(max_retries):
         try:
-            response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt,
-                config={"response_mime_type": "application/json"}
+            # Groq chat completion endpoint
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a Senior Technical SEO Auditor. Output strictly valid JSON."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                # Enforces JSON schema output in Groq
+                response_format={"type": "json_object"},
+                temperature=0.2  # Lower temperature keeps JSON strict
             )
-            return json.loads(response.text)
+
+            # Extract content string and parse as JSON
+            content = response.choices[0].message.content
+            return json.loads(content)
 
         except Exception as e:
-            if "503" in str(e) and attempt < max_retries - 1:
-                wait_time = 5 * (attempt + 1)
-                print(f"Google is busy (503). Retrying in {wait_time} seconds...")
+            # Handle rate limits or transient errors if any
+            if attempt < max_retries - 1:
+                wait_time = 3 * (attempt + 1)
+                print(f"Error calling Groq API: {e}. Retrying in {wait_time} seconds...")
                 time.sleep(wait_time)
             else:
                 raise e
