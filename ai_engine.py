@@ -21,6 +21,7 @@ def generate_seo_report(website_data):
 
     You MUST return your analysis using this exact JSON schema:
     {{
+        "website_name: The url of the webpage to analyze.",
       "seo_score": 0,
       "executive_summary": "A 2-sentence harsh but fair summary of the page's SEO health.",
       "meta_optimizations": {{
