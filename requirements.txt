@@ -1,13 +1,9 @@
 Flask
-gunicorn
-google-genai
-python-dotenv
-markdown
-requests
-beautifulsoup4
-groq
-crawlee
 psycopg2-binary
+crawlee
 asyncpg
 greenlet
 python-dotenv
+groq
+beautifulsoup4
+requests
