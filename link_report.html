@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Link Analysis Report</title>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+</head>
+
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-10 rounded-xl shadow-lg mt-10">
+        <div class="prose prose-blue max-w-none text-gray-800">
+            <h1>Link Analysis Report</h1>
+            <h2>Website: <a href="{{ website }}" target="_blank" class="text-blue-600 no-underline hover:underline">{{ website }}</a></h2>
+            <p class="lead">A comprehensive audit of internal linking architecture, outbound link density, and broken paths.</p>
+
+            <!-- 1. 404 Pages -->
+            <h2 class="text-2xl font-bold mt-10 mb-4 text-gray-900 border-b pb-2">1. Broken Links (404s)</h2>
+            {% if data['404_pages'] %}
+                <p class="text-red-600 font-bold mb-4">Found {{ data['404_pages']|length }} broken links that need immediate fixing.</p>
+                <ul class="list-none pl-0 space-y-4">
+                    {% for item in data['404_pages'] %}
+                    <li class="bg-red-50 p-5 rounded-md border border-red-200 shadow-sm">
+                        <strong class="text-gray-900">Broken URL:</strong> <a href="{{ item.broken_link }}" target="_blank" class="text-red-700 break-all underline">{{ item.broken_link }}</a><br>
+                        <strong class="text-gray-900 mt-2 block">Found On:</strong> <a href="{{ item.source_page }}" target="_blank" class="text-blue-600 break-all text-sm">{{ item.source_page }}</a><br>
+                        <strong class="text-gray-900 mt-2 block">Anchor Text Used:</strong> <span class="italic text-gray-700">"{{ item.anchor_text }}"</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-green-700 italic font-semibold bg-green-50 p-4 rounded-md border border-green-200">No 404 broken links found. Excellent work!</p>
+            {% endif %}
+
+            <!-- 2. Thin Pages (Orphaned Content) -->
+            <h2 class="text-2xl font-bold mt-12 mb-4 text-gray-900 border-b pb-2">2. Thin / Orphan Pages (&lt; 5 Inbound Links)</h2>
+            {% if data['thin_pages'] %}
+                <p class="text-gray-700 mb-4">These pages have weak internal linking, making it difficult for search engines to discover and rank them.</p>
+                <ul class="list-none pl-0 space-y-4">
+                    {% for item in data['thin_pages'] %}
+                    <li class="bg-yellow-50 p-5 rounded-md border border-yellow-200 shadow-sm">
+                        <strong class="text-gray-900">Target Page:</strong> <a href="{{ item.target_page }}" target="_blank" class="text-blue-600 break-all">{{ item.target_page }}</a><br>
+                        <strong class="text-gray-900 mt-2 block">Total Inbound Links:</strong> <span class="font-bold text-yellow-700 text-lg">{{ item.inbound_count }}</span><br>
+
+                        <!-- Accordion to keep the UI clean if there are multiple referrers -->
+                        <details class="mt-3 text-sm group">
+                            <summary class="cursor-pointer text-blue-700 font-semibold hover:text-blue-800 outline-none select-none flex items-center">
+                                <span class="mr-2 text-xs group-open:rotate-90 transition-transform">▼</span>
+                                View Referring Pages
+                            </summary>
+                            <div class="mt-3 bg-white p-4 border border-gray-200 rounded-md shadow-inner max-h-64 overflow-y-auto">
+                                <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                                    {% for ref in item.referring_pages %}
+                                        <li>
+                                            <a href="{{ ref.source_page }}" target="_blank" class="text-blue-600 hover:underline break-all">
+                                                {{ ref.source_page }}
+                                            </a>
+                                            <!-- Anchor text: Bold and NOT italic -->
+                                            <span class="text-gray-900 font-bold ml-2">
+                                                (Anchor: "{{ ref.anchor_text }}")
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </details>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-green-700 italic font-semibold bg-green-50 p-4 rounded-md border border-green-200">No thin pages found. The internal linking structure is strong!</p>
+            {% endif %}
+
+            <!-- 3. Outbound Link Density -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">3. Outbound Link Density</h2>
+                <p class="text-gray-700 mb-6 text-lg">A high-level overview of pages and their total outbound link count.</p>
+
+                <!-- Loop through the new PostgreSQL data -->
+                {% for item in data['outbound_links'] %}
+                <div class="mb-6 border border-yellow-200 bg-[#fffdf0] rounded-md p-5 shadow-sm">
+
+                    <p class="mb-4 text-lg">
+                        <span class="font-bold text-gray-900">Source Page:</span>
+                        <a href="{{ item.source_page }}" class="text-blue-600 hover:underline break-all">{{ item.source_page }}</a>
+                    </p>
+
+                    <p class="font-bold text-gray-900 mb-1 text-lg">Total Outbound Links:</p>
+                    <p class="text-2xl font-bold text-amber-600 mb-4">{{ item.total_outbound }}</p>
+
+                    <!-- Dropdown for specific link details -->
+                    <details class="cursor-pointer group">
+                        <summary class="text-blue-700 font-semibold select-none list-none flex items-center">
+                            <span class="mr-2 text-sm group-open:rotate-90 transition-transform">▶</span>
+                            View Outbound Links
+                        </summary>
+
+                        <!-- Dropdown Content (Scrollable if there are too many links) -->
+                        <div class="mt-4 bg-white p-4 border border-gray-200 rounded-md text-sm text-gray-800 max-h-64 overflow-y-auto shadow-inner">
+                            <ul class="list-disc pl-5 space-y-2">
+                                {% for link in item.links %}
+                                    <li>
+                                        <a href="{{ link.target_link }}" class="text-blue-600 hover:underline break-all" target="_blank">
+                                            {{ link.target_link }}
+                                        </a>
+                                        <span class="text-gray-900 font-bold ml-2">
+                                            (Anchor: "{{ link.anchor_text }}")
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </details>
+
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No outbound links found for this domain.</p>
+                {% endfor %}
+            </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-10 pt-6 border-t border-gray-200 space-y-4 sm:space-y-0 sm:flex sm:space-x-4">
+            <a href="/" class="block w-full text-center bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition duration-300">
+                Run Another Audit
+            </a>
+        </div>
+    </div>
+</body>
+</html>

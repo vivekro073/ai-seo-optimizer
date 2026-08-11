@@ -6,3 +6,8 @@ markdown
 requests
 beautifulsoup4
 groq
+crawlee
+psycopg2-binary
+asyncpg
+greenlet
+python-dotenv
