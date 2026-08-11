@@ -8,3 +8,4 @@ groq
 beautifulsoup4
 requests
 SQLAlchemy
+parsel
